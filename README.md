@@ -23,7 +23,7 @@
 
 ```bash
 # リポジトリのクローン
-git clone [your-repository-url]
+git clone https://github.com/ikkun-2525/invoice-ocr-0602.git
 cd invoice-ocr-manager
 
 # 依存パッケージのインストール
