@@ -1,64 +1,12 @@
-import { OCRData, ProjectBreakdown } from '@/hooks/useInvoiceDetail';
+import { OCRData } from '@/hooks/useOCRData';
+import { ProjectBreakdown } from '@/hooks/useProjectBreakdown';
+import { ACCOUNT_TITLE_MAP, COST_CATEGORY_MAP } from '@/constants/accountMaps';
 
 interface InvoicePreviewProps {
   imageUrl?: string;
   ocrData: OCRData;
   breakdowns: ProjectBreakdown[];
 }
-
-// 勘定科目の変換マップ
-const accountTitleMap: {[key: string]: string} = {
-  "outsourcing": "外注費",
-  "commission": "支払手数料",
-  "advertising": "広告宣伝費",
-  "travel": "旅費交通費",
-  "communication": "通信費",
-  "utilities": "水道光熱費",
-  "supplies": "消耗品費",
-  "rent": "地代家賃",
-  "taxes": "租税公課",
-  "insurance": "保険料",
-  "meeting": "会議費",
-  "entertainment": "接待交際費",
-  "repair": "修繕費",
-  "miscellaneous": "雑費",
-  "newspaper_books": "新聞図書費",
-  "personnel_outsourcing": "人件費（業務委託）",
-  "purchase": "仕入高（原材料・商品）",
-  "shipping": "運賃（配送費）",
-  "lease": "リース料",
-  "equipment": "備品購入費（資産計上対象外）",
-  "honorarium": "支払報酬",
-  "interest": "支払利息",
-  "depreciation": "減価償却費",
-  "social_insurance": "法定福利費"
-};
-
-// 原価区分の変換マップ
-const costCategoryMap: {[key: string]: string} = {
-  "cogs_china": "売上原価：製造原価（中国仕入）",
-  "cogs_materials": "売上原価：材料仕入原価",
-  "cogs_design": "売上原価：デザイン外注費",
-  "cogs_construction": "売上原価：施工外注費",
-  "sga_var_ads": "販管費(変動)：広告費",
-  "sga_var_travel_transport": "販管費(変動)：旅費交通費（移動）",
-  "sga_var_travel_lodging": "販管費(変動)：旅費交通費（宿泊）",
-  "sga_var_sales_outsourcing": "販管費(変動)：営業代行における業務委託費",
-  "sga_var_shipping": "販管費(変動)：送料",
-  "sga_var_rd": "販管費(変動)：研究開発費",
-  "dept_sga_salary": "部門販管費：直接部門給与",
-  "dept_sga_insurance": "部門販管費：直接部門社会保険料",
-  "common_sga_salary": "共通販管費：バックオフィス給与",
-  "common_sga_insurance": "共通販管費：バックオフィス社会保険料",
-  "common_sga_outsourcing": "共通販管費：顧問など業務委託費",
-  "common_sga_rent": "共通販管費：家賃",
-  "common_sga_utilities": "共通販管費：水道光熱費",
-  "common_sga_communication": "共通販管費：通信回線費",
-  "common_sga_saas": "共通販管費：SaaS/WEBシステム利用料（リース含む）",
-  "common_sga_insurance2": "共通販管費：保険料",
-  "common_sga_other": "共通販管費：その他（健康診断/加盟料/ネットバンク利用料）",
-  "finance_interest": "財務支出：支払利息"
-};
 
 export const InvoicePreview = ({ imageUrl, ocrData, breakdowns }: InvoicePreviewProps) => {
   // Calculate totals
@@ -149,7 +97,7 @@ export const InvoicePreview = ({ imageUrl, ocrData, breakdowns }: InvoicePreview
                     <td className="px-2 py-1 whitespace-nowrap text-xs text-gray-900">{breakdown.salesPerson || '-'}</td>
                     <td className="px-2 py-1 whitespace-nowrap text-xs text-gray-900 text-right">{breakdown.amount.toLocaleString()}円</td>
                     <td className="px-2 py-1 whitespace-nowrap text-xs text-gray-900">
-                      {costCategoryMap[breakdown.costCategory] || breakdown.costCategory || '-'}
+                      {COST_CATEGORY_MAP[breakdown.costCategory] || breakdown.costCategory || '-'}
                     </td>
                   </tr>
                 ))}

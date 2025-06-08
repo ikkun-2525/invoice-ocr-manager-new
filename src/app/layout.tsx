@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +30,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="h-screen bg-gray-100 flex flex-col">
-          <Header />
-          <div className="flex flex-1 overflow-hidden">
-            <Sidebar />
-            <main className="flex-1 p-8 overflow-auto">{children}</main>
+        <ErrorBoundary>
+          <div className="h-screen bg-gray-100 flex flex-col">
+            <Header />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <main className="flex-1 p-8 overflow-auto">{children}</main>
+            </div>
           </div>
-        </div>
+        </ErrorBoundary>
       </body>
     </html>
   );

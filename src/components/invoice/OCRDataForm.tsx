@@ -1,4 +1,5 @@
-import { OCRData } from '@/hooks/useInvoiceDetail';
+import { OCRData } from '@/hooks/useOCRData';
+import { PAYMENT_METHOD_OPTIONS, ELECTRONIC_BOOKKEEPING_OPTIONS, ACCOUNT_TYPE_OPTIONS } from '@/constants/accountMaps';
 
 interface OCRDataFormProps {
   ocrData: OCRData;
@@ -120,10 +121,9 @@ export const OCRDataForm = ({ ocrData, onOCRDataChange }: OCRDataFormProps) => {
             onChange={(e) => onOCRDataChange('electronicBookkeepingStatus', e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="">選択してください</option>
-            <option value="compliant">対応済み</option>
-            <option value="non_compliant">未対応</option>
-            <option value="not_applicable">対象外</option>
+            {ELECTRONIC_BOOKKEEPING_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
         </div>
         
@@ -156,10 +156,9 @@ export const OCRDataForm = ({ ocrData, onOCRDataChange }: OCRDataFormProps) => {
                 onChange={(e) => onOCRDataChange('accountType', e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               >
-                <option value="">選択してください</option>
-                <option value="ordinary">普通</option>
-                <option value="current">当座</option>
-                <option value="savings">貯蓄</option>
+                {ACCOUNT_TYPE_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </select>
             </div>
             <div>

@@ -1,5 +1,5 @@
-import { UserRole } from '@/hooks/useInvoiceDetail';
-import { useState } from 'react';
+import { UserRole } from '@/hooks/useUserRole';
+import { useRejectModal } from '@/hooks/useRejectModal';
 
 interface ActionButtonsProps {
   userRole: UserRole;
@@ -24,14 +24,14 @@ export const ActionButtons = ({
   onReject,
   onSkip
 }: ActionButtonsProps) => {
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
-
-  const handleRejectSubmit = () => {
-    onReject(rejectReason);
-    setShowRejectModal(false);
-    setRejectReason('');
-  };
+  const {
+    showRejectModal,
+    rejectReason,
+    openModal,
+    closeModal,
+    handleReasonChange,
+    submitReject
+  } = useRejectModal();
 
   return (
     <>
@@ -114,7 +114,7 @@ export const ActionButtons = ({
               </button>
               <button
                 type="button"
-                onClick={() => setShowRejectModal(true)}
+                onClick={openModal}
                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 shadow-sm"
               >
                 差戻し
@@ -139,23 +139,20 @@ export const ActionButtons = ({
               <h3 className="text-lg font-medium text-gray-900 mb-4">差戻し理由</h3>
               <textarea
                 value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
+                onChange={(e) => handleReasonChange(e.target.value)}
                 placeholder="差戻し理由を入力してください（任意）"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 rows={4}
               />
               <div className="flex justify-end space-x-3 mt-4">
                 <button
-                  onClick={() => {
-                    setShowRejectModal(false);
-                    setRejectReason('');
-                  }}
+                  onClick={closeModal}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
                   キャンセル
                 </button>
                 <button
-                  onClick={handleRejectSubmit}
+                  onClick={() => submitReject(onReject)}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                 >
                   差戻しする
