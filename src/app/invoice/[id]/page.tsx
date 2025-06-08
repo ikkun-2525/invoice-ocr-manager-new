@@ -43,7 +43,11 @@ export default function InvoiceDetailView() {
             />
           </div>
           <div>
-            <InvoicePreview />
+            <InvoicePreview 
+              imageUrl="/sample-invoice.svg" 
+              ocrData={ocrData} 
+              breakdowns={breakdowns} 
+            />
           </div>
         </div>
       </div>

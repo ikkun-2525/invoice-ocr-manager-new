@@ -126,6 +126,63 @@ export const OCRDataForm = ({ ocrData, onOCRDataChange }: OCRDataFormProps) => {
             <option value="not_applicable">対象外</option>
           </select>
         </div>
+        
+        {/* 振込先情報セクション */}
+        <div className="col-span-2 mt-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">振込先情報</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">銀行名</label>
+              <input
+                type="text"
+                value={ocrData.bankName}
+                onChange={(e) => onOCRDataChange('bankName', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">支店名</label>
+              <input
+                type="text"
+                value={ocrData.branchName}
+                onChange={(e) => onOCRDataChange('branchName', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">口座種別</label>
+              <select
+                value={ocrData.accountType}
+                onChange={(e) => onOCRDataChange('accountType', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="">選択してください</option>
+                <option value="ordinary">普通</option>
+                <option value="current">当座</option>
+                <option value="savings">貯蓄</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">口座番号</label>
+              <input
+                type="text"
+                value={ocrData.accountNumber}
+                onChange={(e) => onOCRDataChange('accountNumber', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700">口座名義</label>
+              <input
+                type="text"
+                value={ocrData.accountName}
+                onChange={(e) => onOCRDataChange('accountName', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
+        
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700">メモ欄</label>
           <textarea

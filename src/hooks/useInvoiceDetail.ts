@@ -14,6 +14,11 @@ interface OCRData {
   withholdingTaxAmount: number;
   electronicBookkeepingStatus: string;
   notes: string;
+  bankName: string;
+  branchName: string;
+  accountType: string;
+  accountNumber: string;
+  accountName: string;
 }
 
 interface ProjectBreakdown {
@@ -46,35 +51,68 @@ export const useInvoiceDetail = (invoiceId: string) => {
 
   // OCRデータ状態
   const [ocrData, setOcrData] = useState<OCRData>({
-    invoiceNumber: "",
-    issueDate: "",
-    dueDate: "",
-    invoiceRegistrationNumber: "",
-    supplierName: "",
-    supplierAddress: "",
-    paymentMethod: "",
-    subtotal: 0,
-    taxAmount: 0,
-    totalAmount: 0,
+    invoiceNumber: "INV-12345",
+    issueDate: "2023-06-15",
+    dueDate: "2023-07-15",
+    invoiceRegistrationNumber: "T1234567890123",
+    supplierName: "株式会社サンプル",
+    supplierAddress: "東京都渋谷区サンプル町1-2-3",
+    paymentMethod: "bank_transfer",
+    subtotal: 350000,
+    taxAmount: 35000,
+    totalAmount: 385000,
     withholdingTaxAmount: 0,
-    electronicBookkeepingStatus: "",
-    notes: ""
+    electronicBookkeepingStatus: "compliant",
+    notes: "サンプルの請求書データです。",
+    bankName: "",
+    branchName: "",
+    accountType: "",
+    accountNumber: "",
+    accountName: ""
   });
 
   // 案件別内訳状態
-  const [breakdowns, setBreakdowns] = useState<ProjectBreakdown[]>([{
-    id: "1",
-    breakdownNo: "",
-    department: "",
-    salesPerson: "",
-    projectNumber: "",
-    amount: 0,
-    accountTitle: "",
-    subAccount: "",
-    costCategory: "",
-    taxCategory: "",
-    acceptanceMonth: ""
-  }]);
+  const [breakdowns, setBreakdowns] = useState<ProjectBreakdown[]>([
+    {
+      id: "1",
+      breakdownNo: "001",
+      department: "営業部",
+      salesPerson: "山田太郎",
+      projectNumber: "PRJ-001",
+      amount: 100000,
+      accountTitle: "outsourcing",
+      subAccount: "コンサルティング",
+      costCategory: "sga_var_ads",
+      taxCategory: "taxable_10",
+      acceptanceMonth: "2023-06"
+    },
+    {
+      id: "2",
+      breakdownNo: "002",
+      department: "開発部",
+      salesPerson: "鈴木一郎",
+      projectNumber: "PRJ-002",
+      amount: 200000,
+      accountTitle: "commission",
+      subAccount: "システム開発",
+      costCategory: "dept_sga_salary",
+      taxCategory: "taxable_10",
+      acceptanceMonth: "2023-06"
+    },
+    {
+      id: "3",
+      breakdownNo: "003",
+      department: "サポート部",
+      salesPerson: "佐藤花子",
+      projectNumber: "PRJ-003",
+      amount: 50000,
+      accountTitle: "utilities",
+      subAccount: "保守サポート",
+      costCategory: "common_sga_saas",
+      taxCategory: "taxable_10",
+      acceptanceMonth: "2023-06"
+    }
+  ]);
 
   // OCRデータ更新ハンドラー
   const handleOCRDataChange = (field: keyof OCRData, value: string | number) => {
