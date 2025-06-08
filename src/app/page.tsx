@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface ProcessingInvoice {
   id: string;
@@ -10,12 +11,19 @@ interface ProcessingInvoice {
   progress: number;
   uploadedAt: Date;
   isConfirmed: boolean;
+  ocrData?: {
+    companyName: string;
+    amount: number;
+    issueDate: string;
+    dueDate: string;
+  };
 }
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [processingInvoices, setProcessingInvoices] = useState<ProcessingInvoice[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const router = useRouter();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = event.target.files;
@@ -82,29 +90,29 @@ export default function Home() {
 
   const simulateOCRProcessing = async (invoiceId: string) => {
     await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // OCR結果をシミュレート
+    const mockOCRData = {
+      companyName: 'サンプル株式会社',
+      amount: Math.floor(Math.random() * 500000) + 50000,
+      issueDate: '2024-01-15',
+      dueDate: '2024-02-14'
+    };
+
     setProcessingInvoices(prev =>
       prev.map(inv =>
         inv.id === invoiceId
-          ? { ...inv, status: 'reviewing' }
+          ? { ...inv, status: 'reviewing', ocrData: mockOCRData }
           : inv
       )
     );
   };
 
-  const handleReviewComplete = (invoiceId: string) => {
-    setProcessingInvoices(prev =>
-      prev.map(inv =>
-        inv.id === invoiceId
-          ? { ...inv, status: 'completed', isConfirmed: true }
-          : inv
-      )
-    );
-  };
+
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white shadow sm:rounded-lg p-6">
+    <div className="max-w-6xl mx-auto">
+      <div className="bg-white shadow sm:rounded-lg p-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">
             請求書アップロード
           </h1>
@@ -216,9 +224,12 @@ export default function Home() {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             invoice.status === 'completed' 
                               ? 'bg-green-100 text-green-800'
+                              : invoice.status === 'reviewing'
+                              ? 'bg-blue-100 text-blue-800'
                               : 'bg-gray-100 text-gray-800'
                           }`}>
-                            {invoice.status === 'completed' ? '確認済み' : '未確認'}
+                            {invoice.status === 'completed' ? '✅ 確認済み' : 
+                             invoice.status === 'reviewing' ? '👁️ 確認待ち' : '未確認'}
                           </span>
                         </td>
                       </tr>
@@ -228,7 +239,6 @@ export default function Home() {
               </div>
             </div>
           )}
-        </div>
       </div>
     </div>
   );

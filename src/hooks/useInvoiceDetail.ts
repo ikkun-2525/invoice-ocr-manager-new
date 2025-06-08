@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface OCRData {
   invoiceNumber: string;
@@ -42,11 +43,71 @@ interface UserRole {
 }
 
 export const useInvoiceDetail = (invoiceId: string) => {
-  // ユーザーロール状態
-  const [userRole] = useState<UserRole>({
-    isUploader: true,
-    isSales: false,
-    isAccounting: false
+  const router = useRouter();
+  
+  // ユーザーロール状態（URLパラメータとパスに基づいて動的に設定）
+  const [userRole] = useState<UserRole>(() => {
+    // 簡易的にパスとクエリパラメータから判断（実際はユーザー認証情報から取得）
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromParam = urlParams.get('from');
+      const path = window.location.pathname;
+      
+      // クエリパラメータから判断
+      if (fromParam === 'sales') {
+        return { isUploader: false, isSales: true, isAccounting: false };
+      } else if (fromParam === 'accounting') {
+        return { isUploader: false, isSales: false, isAccounting: true };
+      }
+      
+      // パスから判断（従来の方法）
+      if (path.includes('sales')) {
+        return { isUploader: false, isSales: true, isAccounting: false };
+      } else if (path.includes('accounting')) {
+        return { isUploader: false, isSales: false, isAccounting: true };
+      }
+    }
+    return { isUploader: true, isSales: false, isAccounting: false };
+  });
+
+  // ステータス状態（ロールに応じて初期値を設定）
+  const [status, setStatus] = useState<'uploading' | 'processing' | 'reviewing' | 'reviewed' | 'applied' | 'approved' | 'rejected'>(() => {
+    if (userRole.isSales) return 'reviewed';
+    if (userRole.isAccounting) return 'applied';
+    return 'reviewing';
+  });
+
+  // 連続レビュー用の請求書リスト（ローカルストレージから復元）
+  const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
+  const [invoiceList, setInvoiceList] = useState(() => {
+    // ローカルストレージからリストを復元
+    if (typeof window !== 'undefined') {
+      const storageKey = userRole.isUploader ? 'upload_invoices' : 
+                        userRole.isSales ? 'sales_invoices' : 
+                        userRole.isAccounting ? 'accounting_invoices' : '';
+      
+      const storedList = localStorage.getItem(storageKey);
+      if (storedList) {
+        return JSON.parse(storedList);
+      }
+    }
+    
+    // 初回のみデフォルトリストを生成
+    const defaultList = userRole.isUploader ? ['inv1', 'inv2', 'inv3'] :
+                       userRole.isSales ? ['inv4', 'inv5', 'inv6'] :
+                       userRole.isAccounting ? ['inv7', 'inv8', 'inv9'] : [];
+    
+    const filteredList = defaultList.filter(id => id !== invoiceId);
+    
+    // ローカルストレージに保存
+    if (typeof window !== 'undefined') {
+      const storageKey = userRole.isUploader ? 'upload_invoices' : 
+                        userRole.isSales ? 'sales_invoices' : 
+                        userRole.isAccounting ? 'accounting_invoices' : '';
+      localStorage.setItem(storageKey, JSON.stringify(filteredList));
+    }
+    
+    return filteredList;
   });
 
   // OCRデータ状態
@@ -143,38 +204,121 @@ export const useInvoiceDetail = (invoiceId: string) => {
     }]);
   };
 
+  // 次の請求書に移動する共通関数
+  const moveToNextInvoice = () => {
+    console.log('moveToNextInvoice called');
+    console.log('Current invoiceList:', invoiceList);
+    console.log('Current currentInvoiceIndex:', currentInvoiceIndex);
+    console.log('User role:', userRole);
+    
+    // リストから現在の請求書を削除して更新されたリストを取得
+    const updatedList = invoiceList.filter((_, index) => index !== currentInvoiceIndex);
+    console.log('Updated list after filter:', updatedList);
+    
+    // ローカルストレージにも保存
+    const storageKey = userRole.isUploader ? 'upload_invoices' : 
+                      userRole.isSales ? 'sales_invoices' : 
+                      userRole.isAccounting ? 'accounting_invoices' : '';
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(storageKey, JSON.stringify(updatedList));
+    }
+    
+    // 状態を更新
+    setInvoiceList(updatedList);
+    
+    if (updatedList.length > 0) {
+      // 次の請求書がある場合は移動（削除後のリストの最初の要素）
+      const nextInvoiceId = updatedList[0];
+      console.log('Moving to next invoice:', nextInvoiceId);
+      
+      // 現在のステージに応じたパスで次の請求書詳細画面に移動
+      if (userRole.isUploader) {
+        router.push(`/invoice/${nextInvoiceId}`);
+      } else if (userRole.isSales) {
+        router.push(`/invoice/${nextInvoiceId}?from=sales`);
+      } else if (userRole.isAccounting) {
+        router.push(`/invoice/${nextInvoiceId}?from=accounting`);
+      }
+    } else {
+      // 全ての請求書処理完了後は各ステージのトップ画面に戻る
+      console.log('No more invoices, returning to stage home');
+      
+      // ローカルストレージをクリア
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(storageKey);
+      }
+      
+      if (userRole.isUploader) {
+        console.log('Navigating to upload home');
+        router.push('/'); // アップロード画面
+      } else if (userRole.isSales) {
+        console.log('Navigating to sales home');
+        router.push('/sales'); // 営業画面
+      } else if (userRole.isAccounting) {
+        console.log('Navigating to accounting home');
+        router.push('/accounting'); // 経理画面
+      }
+    }
+  };
+
+  // SKIPハンドラー
+  const handleSkip = () => {
+    moveToNextInvoice();
+  };
+
   // アクションハンドラー
   const handleVisualConfirmation = async () => {
     // TODO: 目視確認APIの呼び出し
     console.log("目視確認完了");
+    setStatus('reviewed');
+    
+    // 次の請求書に移動
+    moveToNextInvoice();
   };
 
   const handleApply = async () => {
     // TODO: 申請APIの呼び出し
     console.log("申請完了");
+    setStatus('applied');
+    
+    // 次の請求書に移動
+    moveToNextInvoice();
   };
 
   const handleApprove = async () => {
     // TODO: 承認APIの呼び出し
     console.log("承認完了");
+    setStatus('approved');
+    
+    // 次の請求書に移動
+    moveToNextInvoice();
   };
 
-  const handleReject = async () => {
+  const handleReject = async (reason?: string) => {
     // TODO: 差戻しAPIの呼び出し
-    console.log("差戻し完了");
+    console.log("差戻し完了", reason);
+    setStatus('rejected');
+    
+    // 次の請求書に移動
+    moveToNextInvoice();
   };
 
   return {
     userRole,
+    status,
     ocrData,
     breakdowns,
+    invoiceList,
+    currentInvoiceIndex,
     handleOCRDataChange,
     handleBreakdownChange,
     addBreakdown,
     handleVisualConfirmation,
     handleApply,
     handleApprove,
-    handleReject
+    handleReject,
+    handleSkip
   };
 };
 
